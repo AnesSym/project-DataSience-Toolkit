@@ -4,7 +4,7 @@ import methods
 from visuals import plot_
 
 
-def convert_easy_apply(df: pd.DataFrame)->pd.DataFrame:
+def convert_easy_apply(df: pd.DataFrame) -> pd.DataFrame:
     """Converts the  "Easy Apply" column values to bool 
 
     Args:
@@ -16,7 +16,7 @@ def convert_easy_apply(df: pd.DataFrame)->pd.DataFrame:
     df["Easy Apply"] = df["Easy Apply"].apply(lambda x: methods.convert_Column_Value_to_Bool(x))
     return df["Easy Apply"]
 
-def clean_company_name(df: pd.DataFrame)->pd.DataFrame:
+def clean_company_name(df: pd.DataFrame) -> pd.DataFrame:
     """Removes the \n character inside the "Company Name" column
 
     Args:
@@ -28,7 +28,7 @@ def clean_company_name(df: pd.DataFrame)->pd.DataFrame:
     df['Company Name'] = df['Company Name'].str.replace('\n.*', ' ', regex=True)
     return df['Company Name']
 
-def clean_job_title(df: pd.DataFrame)->pd.DataFrame:
+def clean_job_title(df: pd.DataFrame) -> pd.DataFrame:
     """Removes "â" and replaces "/" with "|"
 
     Args:
@@ -41,7 +41,7 @@ def clean_job_title(df: pd.DataFrame)->pd.DataFrame:
     df["Job Title"] = df["Job Title"].str.replace("/","|")
     return df["Job Title"] 
 
-def clean_revenue(df: pd.DataFrame)->pd.DataFrame:
+def clean_revenue(df: pd.DataFrame) -> pd.DataFrame:
     """transforms the strings so we can split it easier
 
     Args:
@@ -99,22 +99,52 @@ def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     clean_size(df)
     
     return df
-    
-def transform_dataset(df):
-    """Transforms the dataset so its more readable and easier to use"""
-    
-    df["Minimum Salary"] = df["Salary Estimate"].apply(lambda x : methods.salary_parser_min(x))
-    df["Minimum Salary"] = df["Minimum Salary"].astype(float)
-    df["Maximum Salary"] = df["Salary Estimate"].apply(lambda x : methods.salary_parser_max(x))
-    df["Maximum Salary"] = df["Maximum Salary"].astype(float)
+
+def get_min_max_salary(df: pd.DataFrame) -> pd.DataFrame:
+    """Splits "salary estimate" column into min and max salary 
+
+    Args:
+        df (pd.DataFrame): df["Minimum Salary"]
+
+    Returns:
+        pd.DataFrame: returns 2 new columns ["Minimum Salary"], ["Maximum Salary"]
+    """
+    df["Minimum Salary"] = (df["Salary Estimate"].apply(lambda x : methods.salary_parser_min(x))).astype(float)
+    df["Maximum Salary"] = (df["Salary Estimate"].apply(lambda x : methods.salary_parser_max(x))).astype(float)
     df.drop("Salary Estimate",axis=1, inplace=True)
     
-    
+    return df["Minimum Salary"], df["Maximum Salary"]
+
+def split_Department_from_Job_Title(df: pd.DataFrame) -> pd.DataFrame:
+    """splits the Job Title into 2 new columns, "Department" and "Job Title"
+
+    Args:
+        df (pd.DataFrame): 
+
+    Returns:
+        pd.DataFrame: two columns ["Department"], ["Job Title"]
+    """
     df["Department"] = df["Job Title"].apply(lambda x: methods.splitting_department_from_job_title(x,"department"))    
     df["Job Title"] = df["Job Title"].apply(lambda x: methods.splitting_department_from_job_title(x,"Job Title"))
-    df["Job_title"] = df["Job Title"]
     
-    df.drop("Job Title",axis=1, inplace=True)
+    return df["Department"], df["Job Title"]
+
+def replace_country_names(df: pd.DataFrame, column: str, replacing_dict: dict) -> pd.DataFrame:
+    """ Replaces certain country names with their corresponding country codes in the specified column of a DataFrame.
+
+    Args:
+        df (pd.DataFrame): the dataframe where were applying this method
+        column (str): the name of the column in which to replace the country names with country codes.
+        replacing_dict (dict): dictionary containing what is being replaced
+
+    Returns:
+        pd.DataFrame: returns a new column with replaced values
+    """
+    df[column] = df[column].replace(replacing_dict)
+    return df
+
+def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    
     
     df["Location_City"]=df["Location"].apply(lambda x: methods.spliting_location_and_HQ(x,"city"))
     df["Location_State"]=df["Location"].apply(lambda x: methods.spliting_location_and_HQ(x,"state"))
@@ -124,10 +154,11 @@ def transform_dataset(df):
     df["min_revenue_in_milions"]=df["Revenue"].apply(lambda x: methods.splitting_revenue(x,"min"))
     df["max_revenue_in_milions"]=df["Revenue"].apply(lambda x: methods.splitting_revenue(x,"max"))
     
-    df["HQ_State"] = df["HQ_State"].str.replace("Sweden","SWE")
-    df["HQ_State"] = df["HQ_State"].str.replace("Belgium","BE")
-    df["HQ_State"] = df["HQ_State"].str.replace("Iran","IR")
-    df["HQ_State"] = df["HQ_State"].str.replace("United Kingdom","UK")
+    df = replace_country_names(df, ["HQ_state"], replacing_dict = {
+        "Sweden": "SWE",
+        "Belgium": "BE",
+        "Iran": "IR",
+        "United Kingdom": "UK"})
     
     df["Company Name"] = df["Company Name"].astype(str)
     df["Type of ownership"] = df["Type of ownership"].str.replace("/","|")
@@ -137,8 +168,8 @@ def transform_dataset(df):
     df["max_size_emp"] = df["max_size_emp"].astype(float)
     df["min_size_emp"] = df["min_size_emp"].astype(float)
     
-    
-    
+    return df
+ 
 def top_10_words_in_column(df) -> str:
     """returns 10 most common words in a column
 

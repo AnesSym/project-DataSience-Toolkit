@@ -2,7 +2,17 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def plot_(x = None, y = None, graph_type = None, label_x = None, label_y = None, colors = None, figure_size = (10,6), title = None, separate = False, grid = False, bins = 10):
+def plot_(x = None, 
+          y = None, 
+          graph_type = None, 
+          label_x = None, 
+          label_y = None, 
+          colors = None, 
+          figure_size = (10,6), 
+          title = None, 
+          separate = False, 
+          grid = False, 
+          bins = 10):
     """The function creates a plot based on the specified parameters and returns the plot object.
     Args:
         x (float): array-like object containing x-coordinates of data points to be plotted. Defaults to None.
