@@ -4,24 +4,59 @@ import methods
 from visuals import plot_
 
 
+def convert_easy_apply(df: pd.DataFrame)->pd.DataFrame:
+    """Converts the  "Easy Apply" column values to bool 
 
+    Args:
+        df (pd.DataFrame): column consisted of object values
 
-def clean_dataset(df):
-    """Cleans the dataset"""
-    df["Easy Apply"] = df["Easy Apply"].apply(lambda x : methods.convert_Column_Value_to_Bool(x))
-    methods.replace_to_nan(df)
-    df['Company Name'] = df['Company Name'].str.replace('\n.*', ' ',regex=True)
-    #clean job title
+    Returns:
+        pd.DataFrame: returns a column with bool values 
+    """
+    df["Easy Apply"] = df["Easy Apply"].apply(lambda x: methods.convert_Column_Value_to_Bool(x))
+    return df["Easy Apply"]
+
+def clean_company_name(df: pd.DataFrame)->pd.DataFrame:
+    """Removes the \n character inside the "Company Name" column
+
+    Args:
+        df (pd.DataFrame)
+
+    Returns:
+        pd.DataFrame: returns a column wihtout \n.
+    """
+    df['Company Name'] = df['Company Name'].str.replace('\n.*', ' ', regex=True)
+    return df['Company Name']
+
+def clean_job_title(df: pd.DataFrame)->pd.DataFrame:
+    """Removes "â" and replaces "/" with "|"
+
+    Args:
+        df (pd.DataFrame): 
+
+    Returns:
+        pd.DataFrame: returns a column
+    """
     df["Job Title"] = df["Job Title"].str.replace(" â","")
     df["Job Title"] = df["Job Title"].str.replace("/","|")
-    #clean revenue column
-    df["Revenue"] = df["Revenue"].replace("Unknown / Non-Applicable",np.nan)
-    df['Revenue'] = df['Revenue'].str.replace('$', ' ',regex=True)
-    df['Revenue'] = df['Revenue'].str.replace('(USD)', ' ',regex=True)
-    df['Revenue'] = df['Revenue'].str.replace('(', ' ',regex=True)
-    df['Revenue'] = df['Revenue'].str.replace(')', ' ',regex=True)
-    df['Revenue'] = df['Revenue'].str.replace(' ', '',regex=True)
-    df['Revenue'] = df['Revenue'].str.replace('+', '',regex=True)
+    return df["Job Title"] 
+
+def clean_revenue(df: pd.DataFrame)->pd.DataFrame:
+    """transforms the strings so we can split it easier
+
+    Args:
+        df (pd.DataFrame):
+
+    Returns:
+        pd.DataFrame: returns a transformed "revenue" column
+    """
+    df["Revenue"] = df["Revenue"].replace("Unknown / Non-Applicable", np.nan)
+    df['Revenue'] = df['Revenue'].str.replace('$', ' ', regex=True)
+    df['Revenue'] = df['Revenue'].str.replace('(USD)', ' ', regex=True)
+    df['Revenue'] = df['Revenue'].str.replace('(', ' ', regex=True)
+    df['Revenue'] = df['Revenue'].str.replace(')', ' ', regex=True)
+    df['Revenue'] = df['Revenue'].str.replace(' ', '', regex=True)
+    df['Revenue'] = df['Revenue'].str.replace('+', '', regex=True)
     df['Revenue'] = df['Revenue'].str.replace('2to5billion', '2billionto5billion')
     df['Revenue'] = df['Revenue'].str.replace('5to10billion ', '5billionto10billion')
     df['Revenue'] = df['Revenue'].replace('million', ' ')
@@ -30,11 +65,40 @@ def clean_dataset(df):
     df['Revenue'] = df['Revenue'].str.replace('million', ' ')
     df['Revenue'] = df['Revenue'].str.replace('billion', '000 ')
     df["Revenue"] = df["Revenue"].str.replace(" to","to")
-     #clean Size column
+    return df["Revenue"]
+
+def clean_size(df: pd.DataFrame) -> pd.DataFrame:
+    """cleans the "Size" column and prepares it for separation 
+
+    Args:
+        df (pd.DataFrame): 
+
+    Returns:
+        pd.DataFrame: returns a clean "Size" column
+    """
     df["Size"] = df["Size"].str.replace("employees","",regex=True)
     df["Size"] = df["Size"].str.replace("+","to10001",regex=True)
     df["Size"] = df["Size"].str.replace(" ","",regex=True)
     df["Size"] = df["Size"].replace("Unknown",np.nan)
+    return df["Size"]
+
+def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    """This methods collects all methods for cleaning and transforming the dataframe
+
+    Args:
+        df (pd.DataFrame): 
+
+    Returns:
+        pd.DataFrame: returns the dataframe
+    """
+    convert_easy_apply(df)
+    methods.replace_to_nan(df)
+    clean_company_name(df)
+    clean_job_title(df)
+    clean_revenue(df)
+    clean_size(df)
+    
+    return df
     
 def transform_dataset(df):
     """Transforms the dataset so its more readable and easier to use"""
@@ -73,7 +137,7 @@ def transform_dataset(df):
     df["max_size_emp"] = df["max_size_emp"].astype(float)
     df["min_size_emp"] = df["min_size_emp"].astype(float)
     
-    print(df.head(10))
+    
     
 def top_10_words_in_column(df) -> str:
     """returns 10 most common words in a column
