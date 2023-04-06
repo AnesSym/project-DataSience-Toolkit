@@ -160,19 +160,42 @@ def split_column(df: pd.DataFrame, column_name: str, new_column_prefix: str) -> 
     df[f"{new_column_prefix}_max"] = df[column_name].apply(lambda x: methods.splitting_revenue(x, "max")).astype(float)
     return df
 
-def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
-    
+def split_location(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
+    """
+    Splits a column in a DataFrame into 'city' and 'state' values using the methods.spliting_location_and_HQ function.
+    Appends the resulting columns to the DataFrame with the given new_column_name.
 
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the column to be split.
+        column_name (str): The name of the column to be split.
+        new_column_prefix (str): The prefix to be used for the new column names.
+
+    Returns:
+        pandas.DataFrame: The original DataFrame with the new columns appended.
+    """
+    df[f"{column_name}_City"] = df[column_name].apply(lambda x: methods.spliting_location_and_HQ(x, "city"))
+    df[f"{column_name}_State"] = df[column_name].apply(lambda x: methods.spliting_location_and_HQ(x, "state"))
+    return df
+
+def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    """This Methods collects all other methods and is supposed to be run in the main module.
+
+    Args:
+        df (pd.DataFrame): DataFrame were transforming
+
+    Returns:
+        pd.DataFrame: returns a new transformed DataFrame.
+    """
+    get_min_max_salary(df)
+    split_Department_from_Job_Title(df)
     
-    df["Location_City"]=df["Location"].apply(lambda x: methods.spliting_location_and_HQ(x,"city"))
-    df["Location_State"]=df["Location"].apply(lambda x: methods.spliting_location_and_HQ(x,"state"))
-    df["HQ_City"]=df["Headquarters"].apply(lambda x: methods.spliting_location_and_HQ(x,"city"))
-    df["HQ_State"]=df["Headquarters"].apply(lambda x: methods.spliting_location_and_HQ(x,"state"))
+    df = split_location(df, "Location")
+    df = split_location(df, "Headquarters")
     
     df = split_column(df, "Size", "size_emp")
     df = split_column(df, "Revenue", "revenue_in_milions")
     
-    df = replace_country_names(df, ["HQ_State"], replacing_dict = {
+    df = replace_country_names(df, ["Headquarters_State"], replacing_dict = {
         "Sweden": "SWE",
         "Belgium": "BE",
         "Iran": "IR",
