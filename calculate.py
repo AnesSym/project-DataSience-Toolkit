@@ -219,6 +219,8 @@ def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
     df["Company Name"] = df["Company Name"].astype(str)
     df["Type of ownership"] = df["Type of ownership"].str.replace("/","|")
     
+    df["Median Salary"]=(df["Maximum Salary"] + df["Minimum Salary"])/2
+    
     return df
  
 def top_10_words_in_column(df) -> str:
@@ -240,3 +242,6 @@ def plot_graphs(df):
     x2 = df["Maximum Salary"]
     return plot_(x1, x2 , graph_type = ["hist"], colors= "blue", title="Salary Distribution", grid=True, separate=False, label_x="Salary", figure_size=(10,4), bins = 100)
 
+def view_specific_table(df: pd.DataFrame) -> pd.DataFrame:
+    list_columns = ["index", "Job Title", "Rating", "Maximum Salary", "Median Salary"]
+    return methods.view_table(df, list_columns)

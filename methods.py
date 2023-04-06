@@ -187,3 +187,6 @@ def take(n :int, iterable: dict)->list:
     for item in items:
         print(item[0])
 
+def view_table(df: pd.DataFrame, columns: list) -> pd.DataFrame:
+    new_df = df.loc[:,columns]
+    return new_df
