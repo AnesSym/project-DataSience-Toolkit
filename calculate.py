@@ -177,6 +177,19 @@ def split_location(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
     df[f"{column_name}_State"] = df[column_name].apply(lambda x: methods.spliting_location_and_HQ(x, "state"))
     return df
 
+def align_index(df: pd.DataFrame) -> pd.DataFrame:
+    """fixing the index column to align the  default index
+
+    Args:
+        df (pd.DataFrame): the DataFrame were working with
+
+    Returns:
+        pd.DataFrame: returns a DataFrame where the dataframe index is the same as the default index column
+    """
+    for i in df.index: 
+        df.loc[i,"index"] = i
+    return df
+
 def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
     """This Methods collects all other methods and is supposed to be run in the main module.
 
@@ -188,6 +201,7 @@ def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
     """
     get_min_max_salary(df)
     split_Department_from_Job_Title(df)
+    align_index(df)
     
     df = split_location(df, "Location")
     df = split_location(df, "Headquarters")
