@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 from itertools import islice
-
+import pandas as pd
 
 
 def convert_Column_Value_to_Bool(dataset: object) -> bool:
@@ -18,7 +18,15 @@ def convert_Column_Value_to_Bool(dataset: object) -> bool:
         return False
     return True
 
-def replace_to_nan(dataset: object) -> np.nan:
+def replace_to_nan(dataset: pd.DataFrame) -> pd.DataFrame:
+    """replaces all objects -1, -1.0 and "-1" as NaN
+
+    Args:
+        dataset (object): entire datatset
+
+    Returns:
+        DataFrame: returns a new dataframe where the change is applied
+    """
     return dataset.replace((['-1',"-1.0",-1]), [np.nan,np.nan,np.nan], inplace=True)
 
 def salary_parser_min(salary_string: str):
