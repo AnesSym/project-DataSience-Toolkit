@@ -218,9 +218,8 @@ def top_10_words_in_column(df) -> str:
     """
     df["Job Description"]=df["Job Description"].apply(lambda x: methods.cleaning_column(x))
     df['frequency'] = df["Job Description"].apply(methods.word_frequency)
-    merged_sorted_freq = methods.merge_dict_from_word_frequency(df["frequency"])
-    items = methods.take(10, merged_sorted_freq.items())
-    return methods.n_most_searched_words(items)
+    merged_sorted_freq = methods.merge_dict_from_word_frequency(df["frequency"]) 
+    return methods.take(10, merged_sorted_freq.items())
     
 def plot_graphs(df):
     x1 = df["Minimum Salary"]

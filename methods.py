@@ -2,6 +2,7 @@ import numpy as np
 from collections import defaultdict
 from itertools import islice
 import pandas as pd
+import re
 
 
 def convert_Column_Value_to_Bool(dataset: object) -> bool:
@@ -131,53 +132,10 @@ def cleaning_column (entry:str) -> str:
     Returns:
         str: returns an all lowered text that is cleaned from special chars and common stopowords.
     """
+    strings_to_replace = [",", "\n", ".", "/ ", "/", "(",")" ," and ", " a ", " the ", " our ", " we ", " to ", " of ", " is ", " in ", " with ", " as ", " has ", " you ", " that ", " are ", " at ", " like ", " on ", " about ", " have ", " us ", " help ", " for ", " what ", " real ", " their ", " new ", " an ", " or ", " this ", " in ", " into ", "•", " will ", " from ", " be ", " by ", "  "]
     entry = entry.lower()
-    entry = entry.replace(",","")
-    entry = entry.replace("\n"," ")
-    entry = entry.replace(".","")
-    entry = entry.replace("/ ","")
-    entry = entry.replace("/","|")
-    entry = entry.replace("(","")
-    entry = entry.replace(")","")
-    entry = entry.replace("  "," ")
-    entry = entry.replace(" and "," ")
-    entry = entry.replace(" a "," ")
-    entry = entry.replace(" the "," ")
-    entry = entry.replace(" our "," ")
-    entry = entry.replace(" we "," ")
-    entry = entry.replace(" to "," ")
-    entry = entry.replace(" of "," ")
-    entry = entry.replace(" is "," ")
-    entry = entry.replace(" in "," ")
-    entry = entry.replace(" with "," ")
-    entry = entry.replace(" as "," ")
-    entry = entry.replace(" has "," ")
-    entry = entry.replace(" you "," ")
-    entry = entry.replace(" that "," ")
-    entry = entry.replace(" are "," ")
-    entry = entry.replace(" at "," ")
-    entry = entry.replace(" like "," ")
-    entry = entry.replace(" on "," ")
-    entry = entry.replace(" about "," ")
-    entry = entry.replace(" have "," ")
-    entry = entry.replace(" us "," ")
-    entry = entry.replace(" help "," ")
-    entry = entry.replace(" for "," ")
-    entry = entry.replace(" what "," ")
-    entry = entry.replace(" real "," ")
-    entry = entry.replace(" their "," ")
-    entry = entry.replace(" new "," ")
-    entry = entry.replace(" an "," ")
-    entry = entry.replace(" or "," ")
-    entry = entry.replace(" this "," ")
-    entry = entry.replace(" in "," ")
-    entry = entry.replace(" into "," ")
-    entry = entry.replace("•"," ")
-    entry = entry.replace(" will "," ")
-    entry = entry.replace(" from "," ")
-    entry = entry.replace(" be "," ")
-    entry = entry.replace(" by "," ")
-    
+    for string in strings_to_replace:
+        entry = entry.replace(string," ")
     return entry
 
 def word_frequency(text: str)-> dict:
@@ -218,23 +176,14 @@ def merge_dict_from_word_frequency (entry: dict) -> dict:
     return new_frequency_sorted
     
 def take(n :int, iterable: dict)->list:
-    """Return the first n items of the iterable as a list.
+    """Return the first n items of the iterable as a list and prints them out.
 
     Args:
         n (int): number of words 
         iterable (dict): dictionary we want to return as a list
 
-    Returns:
-        list: first n items from the dict 
     """
-    
-    return list(islice(iterable, n))
+    items = list(islice(iterable, n))
+    for item in items:
+        print(item[0])
 
-def n_most_searched_words(entry):
-    """this method only loops thru the list and prints the top n words searched
-
-    Args:
-        entry (list): list of items 
-    """
-    for item in entry:
-         print(item[0])
