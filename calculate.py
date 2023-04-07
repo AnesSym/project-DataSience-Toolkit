@@ -4,8 +4,8 @@ import methods
 from visuals import plot_
 
 
-def convert_easy_apply(df: pd.DataFrame) -> pd.DataFrame:
-    """Converts the  "Easy Apply" column values to bool 
+def convert_easy_apply(df: pd.DataFrame, entry: str) -> pd.DataFrame:
+    """Converts the  column values to bool 
 
     Args:
         df (pd.DataFrame): column consisted of object values
@@ -13,74 +13,33 @@ def convert_easy_apply(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: returns a column with bool values 
     """
-    df["Easy Apply"] = df["Easy Apply"].apply(lambda x: methods.convert_Column_Value_to_Bool(x))
-    return df["Easy Apply"]
+    df[entry] = df[entry].apply(lambda x: methods.convert_Column_Value_to_Bool(x))
+    return df
 
-def clean_company_name(df: pd.DataFrame) -> pd.DataFrame:
-    """Removes the \n character inside the "Company Name" column
+def clean(df: pd.DataFrame, entry: dict) -> pd.DataFrame:
+    """
+    Cleans the specified column in the input DataFrame by replacing a set of
+    input values with a set of output values using regular expressions.
 
     Args:
-        df (pd.DataFrame)
+        df (pd.DataFrame): The DataFrame to be cleaned.
+        entry (dict): A dictionary containing the following keys:
+            - 'col' (str): The name of the column to be cleaned.
+            - 'input' (list of str): A list of strings to be replaced in the column.
+            - 'output' (list of str): A list of strings to replace the input strings with.
 
     Returns:
-        pd.DataFrame: returns a column wihtout \n.
+        pd.DataFrame: The cleaned DataFrame.
+
+    Raises:
+        ValueError: If the 'col', 'input', or 'output' keys are missing from the 'entry' dictionary.
+
     """
-    df['Company Name'] = df['Company Name'].str.replace('\n.*', ' ', regex=True)
-    return df['Company Name']
-
-def clean_job_title(df: pd.DataFrame) -> pd.DataFrame:
-    """Removes "â" and replaces "/" with "|"
-
-    Args:
-        df (pd.DataFrame): 
-
-    Returns:
-        pd.DataFrame: returns a column
-    """
-    df["Job Title"] = df["Job Title"].str.replace(" â","")
-    df["Job Title"] = df["Job Title"].str.replace("/","|")
-    return df["Job Title"] 
-
-def clean_revenue(df: pd.DataFrame) -> pd.DataFrame:
-    """transforms the strings so we can split it easier
-
-    Args:
-        df (pd.DataFrame):
-
-    Returns:
-        pd.DataFrame: returns a transformed "revenue" column
-    """
-    df["Revenue"] = df["Revenue"].replace("Unknown / Non-Applicable", np.nan)
-    df['Revenue'] = df['Revenue'].str.replace('$', ' ', regex=True)
-    df['Revenue'] = df['Revenue'].str.replace('(USD)', ' ', regex=True)
-    df['Revenue'] = df['Revenue'].str.replace('(', ' ', regex=True)
-    df['Revenue'] = df['Revenue'].str.replace(')', ' ', regex=True)
-    df['Revenue'] = df['Revenue'].str.replace(' ', '', regex=True)
-    df['Revenue'] = df['Revenue'].str.replace('+', '', regex=True)
-    df['Revenue'] = df['Revenue'].str.replace('2to5billion', '2billionto5billion')
-    df['Revenue'] = df['Revenue'].str.replace('5to10billion ', '5billionto10billion')
-    df['Revenue'] = df['Revenue'].replace('million', ' ')
-    df['Revenue'] = df['Revenue'].replace('10billion', '10billionto11billion')
-    df['Revenue'] = df['Revenue'].str.replace('Lessthan1million', '0millionto1million')
-    df['Revenue'] = df['Revenue'].str.replace('million', ' ')
-    df['Revenue'] = df['Revenue'].str.replace('billion', '000 ')
-    df["Revenue"] = df["Revenue"].str.replace(" to","to")
-    return df["Revenue"]
-
-def clean_size(df: pd.DataFrame) -> pd.DataFrame:
-    """cleans the "Size" column and prepares it for separation 
-
-    Args:
-        df (pd.DataFrame): 
-
-    Returns:
-        pd.DataFrame: returns a clean "Size" column
-    """
-    df["Size"] = df["Size"].str.replace("employees","",regex=True)
-    df["Size"] = df["Size"].str.replace("+","to10001",regex=True)
-    df["Size"] = df["Size"].str.replace(" ","",regex=True)
-    df["Size"] = df["Size"].replace("Unknown",np.nan)
-    return df["Size"]
+    column_name = entry["col"]
+    input_name = entry["input"]
+    output_name = entry["output"]
+    df[column_name] = df[column_name].replace((input_name), output_name, regex = True)
+    return df
 
 def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     """This methods collects all methods for cleaning and transforming the dataframe
@@ -91,12 +50,18 @@ def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: returns the dataframe
     """
-    convert_easy_apply(df)
+    
+    convert_easy_apply(df, "Easy Apply")
     methods.replace_to_nan(df)
-    clean_company_name(df)
-    clean_job_title(df)
-    clean_revenue(df)
-    clean_size(df)
+    
+    cols = ["Size","Company Name","Job Title","Revenue"]
+    inputs = [["employees", "\+", " ", "Unknown"],["\n.*"],[" â"],["Unknown / Non-Applicable", '\$', '(USD)', '\(', '\)', ' ', '\+', '2to5billion', '5to10billion ', 'million', '10billion', 'Lessthan1million', 'million', 'billion', ' to']
+]
+    outputs = [["", "to10001","",np.nan],[""],[""],[np.nan, ' ', ' ', ' ', ' ', '', '', '2billionto5billion', '5billionto10billion', ' ', '10billionto11billion', '0millionto1million', ' ', '000 ', 'to']
+]
+    for i in range (len(cols)):
+        temp_dict = {"col": cols[i], "input": inputs[i], "output": outputs[i]}
+        df = clean(df, temp_dict)
     
     return df
 
