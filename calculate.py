@@ -55,10 +55,8 @@ def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     methods.replace_to_nan(df)
     
     cols = ["Size","Company Name","Job Title","Revenue"]
-    inputs = [["employees", "\+", " ", "Unknown"],["\n.*"],[" â"],["Unknown / Non-Applicable", '\$', '(USD)', '\(', '\)', ' ', '\+', '2to5billion', '5to10billion ', 'million', '10billion', 'Lessthan1million', 'million', 'billion', ' to']
-]
-    outputs = [["", "to10001","",np.nan],[""],[""],[np.nan, ' ', ' ', ' ', ' ', '', '', '2billionto5billion', '5billionto10billion', ' ', '10billionto11billion', '0millionto1million', ' ', '000 ', 'to']
-]
+    inputs = [["employees", "\+", " ", "Unknown"],["\n.*"],[" â"],["Unknown / Non-Applicable", '\$', '(USD)', '\(', '\)', ' ', '\+', '2to5billion', '5to10billion ', 'million', '10billion', 'Lessthan1million', 'million', 'billion', ' to']]
+    outputs = [["", "to10001","",np.nan],[""],[""],[np.nan, ' ', ' ', ' ', ' ', '', '', '2billionto5billion', '5billionto10billion', ' ', '10billionto11billion', '0millionto1million', ' ', '000 ', 'to']]
     for i in range (len(cols)):
         temp_dict = {"col": cols[i], "input": inputs[i], "output": outputs[i]}
         df = clean(df, temp_dict)
@@ -78,7 +76,7 @@ def get_min_max_salary(df: pd.DataFrame) -> pd.DataFrame:
     df["Maximum Salary"] = (df["Salary Estimate"].apply(lambda x : methods.salary_parser_max(x))).astype(float)
     df.drop("Salary Estimate",axis=1, inplace=True)
     
-    return df["Minimum Salary"], df["Maximum Salary"]
+    return df
 
 def split_Department_from_Job_Title(df: pd.DataFrame) -> pd.DataFrame:
     """splits the Job Title into 2 new columns, "Department" and "Job Title"
@@ -121,8 +119,8 @@ def split_column(df: pd.DataFrame, column_name: str, new_column_prefix: str) -> 
     Returns:
         pandas.DataFrame: The original DataFrame with the new columns appended.
     """
-    df[f"{new_column_prefix}_min"] = df[column_name].apply(lambda x: methods.splitting_revenue(x, "min")).astype(float)
-    df[f"{new_column_prefix}_max"] = df[column_name].apply(lambda x: methods.splitting_revenue(x, "max")).astype(float)
+    df[f"{new_column_prefix}_min"] = df[column_name].apply(lambda x: methods.splitting_revenue(x, "min"))
+    df[f"{new_column_prefix}_max"] = df[column_name].apply(lambda x: methods.splitting_revenue(x, "max"))
     return df
 
 def split_location(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
@@ -172,7 +170,6 @@ def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
     df = split_location(df, "Headquarters")
     
     df = split_column(df, "Size", "size_emp")
-    df = split_column(df, "Revenue", "revenue_in_milions")
     
     df = replace_country_names(df, ["Headquarters_State"], replacing_dict = {
         "Sweden": "SWE",
@@ -182,8 +179,6 @@ def transform_dataset(df: pd.DataFrame) -> pd.DataFrame:
         "Canada": "CA" })
     
     df["Company Name"] = df["Company Name"].astype(str)
-    df["Type of ownership"] = df["Type of ownership"].str.replace("/","|")
-    
     df["Median Salary"]=(df["Maximum Salary"] + df["Minimum Salary"])/2
     
     return df
@@ -208,5 +203,13 @@ def plot_graphs(df):
     return plot_(x1, x2 , graph_type = ["hist"], colors= "blue", title="Salary Distribution", grid=True, separate=False, label_x="Salary", figure_size=(10,4), bins = 100)
 
 def view_specific_table(df: pd.DataFrame) -> pd.DataFrame:
+    """returns a dataframe of specific columns
+
+    Args:
+        df (pd.DataFrame): original dataframe were exctracting columns from.
+
+    Returns:
+        pd.DataFrame: returns the same dataframe but with specific columns.
+    """
     list_columns = ["index", "Job Title", "Rating", "Maximum Salary", "Median Salary"]
     return methods.view_table(df, list_columns)

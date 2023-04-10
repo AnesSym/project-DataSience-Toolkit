@@ -188,5 +188,14 @@ def take(n :int, iterable: dict)->list:
         print(item[0])
 
 def view_table(df: pd.DataFrame, columns: list) -> pd.DataFrame:
+    """method that allows us to view specific a table of columns
+
+    Args:
+        df (pd.DataFrame): dataframe were extracting columns from.
+        columns (list): list of columns
+
+    Returns:
+        pd.DataFrame: returns an new dataframe with specified columns
+    """
     new_df = df.loc[:,columns]
     return new_df
